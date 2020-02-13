@@ -1053,15 +1053,26 @@ def execute(args):
             animal_trait_table[animal_id] = revised_animal_trait_dict
 
         # enforce absence of grazing as zero biomass removed
+        # for pft_i in pft_id_set:
+        #     pygeoprocessing.new_raster_from_base(
+        #         aligned_inputs['pft_{}'.format(pft_i)],
+        #         month_reg['flgrem_{}'.format(pft_i)], gdal.GDT_Float32,
+        #         [_TARGET_NODATA], fill_value_list=[0])
+        #     pygeoprocessing.new_raster_from_base(
+        #         aligned_inputs['pft_{}'.format(pft_i)],
+        #         month_reg['fdgrem_{}'.format(pft_i)], gdal.GDT_Float32,
+        #         [_TARGET_NODATA], fill_value_list=[0])
+
+        # enforce constant level of removal of live biomass
         for pft_i in pft_id_set:
             pygeoprocessing.new_raster_from_base(
                 aligned_inputs['pft_{}'.format(pft_i)],
                 month_reg['flgrem_{}'.format(pft_i)], gdal.GDT_Float32,
-                [_TARGET_NODATA], fill_value_list=[0])
+                [_TARGET_NODATA], fill_value_list=[0.03])
             pygeoprocessing.new_raster_from_base(
                 aligned_inputs['pft_{}'.format(pft_i)],
                 month_reg['fdgrem_{}'.format(pft_i)], gdal.GDT_Float32,
-                [_TARGET_NODATA], fill_value_list=[0])
+                [_TARGET_NODATA], fill_value_list=[0.03])
 
         # TODO experimental
         # populate provisional_sv_reg with provisional biomass in absence of
