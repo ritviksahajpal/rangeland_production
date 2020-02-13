@@ -659,14 +659,15 @@ def execute(args):
             'precip_{}'.format(month_index)] = precip_path
         if not os.path.exists(precip_path):
             missing_precip_path_list.append(precip_path)
-        EO_index_path = args[
-            'monthly_vi_path_pattern'].replace(
-                '<year>', str(year)).replace(
-                '<month>', '{:02d}'.format(month_i))
-        base_align_raster_path_id_map[
-            'EO_index_{}'.format(month_index)] = EO_index_path
-        if not os.path.exists(EO_index_path):
-            missing_EO_index_path_list.append(EO_index_path)
+        # TODO experimental
+        # EO_index_path = args[
+        #     'monthly_vi_path_pattern'].replace(
+        #         '<year>', str(year)).replace(
+        #         '<month>', '{:02d}'.format(month_i))
+        # base_align_raster_path_id_map[
+        #     'EO_index_{}'.format(month_index)] = EO_index_path
+        # if not os.path.exists(EO_index_path):
+        #     missing_EO_index_path_list.append(EO_index_path)
     if missing_precip_path_list:
         raise ValueError(
             "Couldn't find the following precipitation paths given the " +
@@ -1062,56 +1063,57 @@ def execute(args):
                 month_reg['fdgrem_{}'.format(pft_i)], gdal.GDT_Float32,
                 [_TARGET_NODATA], fill_value_list=[0])
 
+        # TODO experimental
         # populate provisional_sv_reg with provisional biomass in absence of
         #   grazing
-        _potential_production(
-            aligned_inputs, site_param_table, current_month, month_index,
-            pft_id_set, veg_trait_table, prev_sv_reg, pp_reg, month_reg)
-        _root_shoot_ratio(
-            aligned_inputs, site_param_table, current_month, pft_id_set,
-            veg_trait_table, prev_sv_reg, year_reg, month_reg)
-        _soil_water(
-            aligned_inputs, site_param_table, veg_trait_table, current_month,
-            month_index, prev_sv_reg, pp_reg, pft_id_set, month_reg,
-            provisional_sv_reg)
-        _decomposition(
-            aligned_inputs, current_month, month_index, pft_id_set,
-            site_param_table, year_reg, month_reg, prev_sv_reg, pp_reg,
-            provisional_sv_reg)
-        _death_and_partition(
-            'stded', aligned_inputs, site_param_table, current_month,
-            year_reg, pft_id_set, veg_trait_table, prev_sv_reg,
-            provisional_sv_reg)
-        _death_and_partition(
-            'bgliv', aligned_inputs, site_param_table, current_month,
-            year_reg, pft_id_set, veg_trait_table, prev_sv_reg,
-            provisional_sv_reg)
-        _shoot_senescence(
-            pft_id_set, veg_trait_table, prev_sv_reg, month_reg, current_month,
-            provisional_sv_reg)
-        intermediate_sv_reg = copy_intermediate_sv(
-            pft_id_set, provisional_sv_reg, intermediate_sv_dir)
-        delta_agliv_dict = _new_growth(
-            pft_id_set, aligned_inputs, site_param_table, veg_trait_table,
-            month_reg, current_month, provisional_sv_reg)
-        _apply_new_growth(delta_agliv_dict, pft_id_set, provisional_sv_reg)
+        # _potential_production(
+        #     aligned_inputs, site_param_table, current_month, month_index,
+        #     pft_id_set, veg_trait_table, prev_sv_reg, pp_reg, month_reg)
+        # _root_shoot_ratio(
+        #     aligned_inputs, site_param_table, current_month, pft_id_set,
+        #     veg_trait_table, prev_sv_reg, year_reg, month_reg)
+        # _soil_water(
+        #     aligned_inputs, site_param_table, veg_trait_table, current_month,
+        #     month_index, prev_sv_reg, pp_reg, pft_id_set, month_reg,
+        #     provisional_sv_reg)
+        # _decomposition(
+        #     aligned_inputs, current_month, month_index, pft_id_set,
+        #     site_param_table, year_reg, month_reg, prev_sv_reg, pp_reg,
+        #     provisional_sv_reg)
+        # _death_and_partition(
+        #     'stded', aligned_inputs, site_param_table, current_month,
+        #     year_reg, pft_id_set, veg_trait_table, prev_sv_reg,
+        #     provisional_sv_reg)
+        # _death_and_partition(
+        #     'bgliv', aligned_inputs, site_param_table, current_month,
+        #     year_reg, pft_id_set, veg_trait_table, prev_sv_reg,
+        #     provisional_sv_reg)
+        # _shoot_senescence(
+        #     pft_id_set, veg_trait_table, prev_sv_reg, month_reg, current_month,
+        #     provisional_sv_reg)
+        # intermediate_sv_reg = copy_intermediate_sv(
+        #     pft_id_set, provisional_sv_reg, intermediate_sv_dir)
+        # delta_agliv_dict = _new_growth(
+        #     pft_id_set, aligned_inputs, site_param_table, veg_trait_table,
+        #     month_reg, current_month, provisional_sv_reg)
+        # _apply_new_growth(delta_agliv_dict, pft_id_set, provisional_sv_reg)
 
-        # estimate animal density from provisional biomass in the absence of
-        #   grazing vs observed biomass from earth observations
-        obs_biomass_path = os.path.join(
-            output_dir, 'observed_biomass_{}_{}.tif'.format(
-                current_year, current_month))
-        _estimate_animal_density(
-            aligned_inputs, month_index, pft_id_set, site_param_table,
-            args['animal_grazing_areas_path'], provisional_sv_reg,
-            obs_biomass_path, month_reg)
+        # # estimate animal density from provisional biomass in the absence of
+        # #   grazing vs observed biomass from earth observations
+        # obs_biomass_path = os.path.join(
+        #     output_dir, 'observed_biomass_{}_{}.tif'.format(
+        #         current_year, current_month))
+        # _estimate_animal_density(
+        #     aligned_inputs, month_index, pft_id_set, site_param_table,
+        #     args['animal_grazing_areas_path'], provisional_sv_reg,
+        #     obs_biomass_path, month_reg)
 
-        # estimate grazing offtake by animals relative to provisional biomass
-        #   at an intermediate step, after senescence but before new growth
-        _calc_grazing_offtake(
-            aligned_inputs, args['aoi_path'], args['management_threshold'],
-            intermediate_sv_reg, pft_id_set, aligned_inputs['animal_index'],
-            animal_trait_table, veg_trait_table, current_month, month_reg)
+        # # estimate grazing offtake by animals relative to provisional biomass
+        # #   at an intermediate step, after senescence but before new growth
+        # _calc_grazing_offtake(
+        #     aligned_inputs, args['aoi_path'], args['management_threshold'],
+        #     intermediate_sv_reg, pft_id_set, aligned_inputs['animal_index'],
+        #     animal_trait_table, veg_trait_table, current_month, month_reg)
 
         # estimate actual biomass production for this step, integrating impacts
         #   of grazing
@@ -1154,9 +1156,10 @@ def execute(args):
             pft_id_set, aligned_inputs, site_param_table, veg_trait_table,
             month_reg, current_month, sv_reg)
 
-        _animal_diet_sufficiency(
-            sv_reg, pft_id_set, aligned_inputs, animal_trait_table,
-            veg_trait_table, current_month, month_reg)
+        # TODO experimental
+        # _animal_diet_sufficiency(
+        #     sv_reg, pft_id_set, aligned_inputs, animal_trait_table,
+        #     veg_trait_table, current_month, month_reg)
 
         _grazing(
             aligned_inputs, site_param_table, month_reg, animal_trait_table,
@@ -1166,9 +1169,10 @@ def execute(args):
 
         _leach(aligned_inputs, site_param_table, month_reg, sv_reg)
 
-        _write_monthly_outputs(
-            aligned_inputs, provisional_sv_reg, sv_reg, month_reg, pft_id_set,
-            current_year, current_month, output_dir)
+        # TODO experimental
+        # _write_monthly_outputs(
+        #     aligned_inputs, provisional_sv_reg, sv_reg, month_reg, pft_id_set,
+        #     current_year, current_month, output_dir)
 
     # clean up
     shutil.rmtree(persist_param_dir)
